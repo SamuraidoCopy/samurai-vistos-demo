@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="description" content="Demonstração navegável de um processo de visto japonês de descendente, com caso fictício.">
+<style>html{color-scheme:light}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Protótipo Samurai Vistos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&family=Reenie+Beanie&display=swap">
+<style>
+/* Layout: mesa de trabalho — trilho de etapas à esquerda, área de trabalho à direita; no celular o trilho vira faixa rolável. */
+/* Visual: carta sobre kraft — folha de papel, tinta marrom, monoespaçada, cantos retos, vermelho só para ação e aviso, azul de caneta para o que foi lido. Tema único, por escolha. */
+:root{
+  --bg:#BD9873; --surface:#E6DDD1; --surface-2:#DACFBF; --box:#F8F4EC; --line:rgba(73,36,26,.38); --fg:#49241A; --muted:#75574A;
+  --accent:#49241A; --accent-soft:#DACFBF; --on-accent:#EBE1D5;
+  --red:#B00700; --red-edge:#CE453F; --spoiler:#A8201A; --bar:#EBE1D5;
+  --ok:#2F5E2A; --ok-soft:#DCE3CC; --warn:#7A4B00; --warn-soft:#EFDDB5; --crit:#B00700; --crit-soft:#F1D3CC;
+  --sug:#1F3C8F; --sug-soft:#DDE0EE;
+  --paper:#F8F4EC; --paper-ink:#49241A; --paper-line:#BFA889; --mark:#F0D98C;
+  --display:"Roboto Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --body:"Roboto Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --mono:"Roboto Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --hand:"Reenie Beanie","Bradley Hand","Segoe Print",cursive;
+  --shadow-paper:0 2px 4px rgba(40,20,10,.18),4px 14px 30px rgba(40,20,10,.28);
+  --shadow-input:inset 2px 2px 0 rgba(73,36,26,.12);
+  color-scheme:light;
+}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px}
+h1,h2,h3{font-family:var(--display);font-weight:600;text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:1.55rem} h2{font-size:1.15rem} h3{font-size:1rem}
+p{margin:0} a{color:var(--accent)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono);font-size:.82rem}
+.muted{color:var(--muted)}
+.eyebrow{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+.app{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px}
+.seal{width:34px;height:34px;border-radius:8px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-family:var(--display);font-weight:600}
+.brand b{font-family:var(--display);font-size:1.05rem}
+.demo-tag{font-size:.8rem;padding:5px 10px;border:1px dashed var(--warn);color:var(--warn);background:var(--warn-soft);border-radius:999px}
+
+.shell{display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;align-items:start}
+.rail{display:flex;flex-direction:column;gap:2px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+.rail button{display:flex;align-items:center;gap:10px;text-align:left;border:0;background:none;padding:9px 10px;border-radius:8px;color:var(--muted);font-weight:500}
+.rail button:hover{background:var(--surface-2);color:var(--fg)}
+.rail button[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.rail .n{font-family:var(--mono);font-size:.72rem;width:18px;opacity:.7}
+.rail .sep{height:1px;background:var(--line);margin:8px 4px}
+.rail small{font-size:.68rem;border:1px solid currentColor;border-radius:999px;padding:0 6px;margin-left:auto;opacity:.8}
+main{min-width:0;display:flex;flex-direction:column;gap:16px}
+.head{display:flex;flex-direction:column;gap:6px}
+.head p{color:var(--muted);max-width:68ch}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.panel>h2,.panel>h3{margin-bottom:10px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr))}
+.stat b{font-family:var(--display);font-size:1.9rem;display:block;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:.86rem}
+.list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.list li{display:flex;gap:10px;align-items:flex-start}
+.dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:.5em}
+
+.flow{display:flex;flex-wrap:wrap;gap:8px}
+.flow button{flex:1 1 130px;text-align:left;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.flow button:hover{border-color:var(--accent)}
+.flow b{font-family:var(--display)} .flow span{font-size:.82rem;color:var(--muted)}
+
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.p-ok{color:var(--ok);background:var(--ok-soft)}
+.p-dec{color:var(--warn);background:var(--warn-soft)} .p-dec::before{background:linear-gradient(90deg,currentColor 50%,transparent 50%);border:1px solid currentColor}
+.p-sug{color:var(--sug);background:var(--sug-soft);border-style:dashed;border-color:currentColor} .p-sug::before{background:none;border:1.5px dashed currentColor}
+.p-crit{color:var(--crit);background:var(--crit-soft)}
+.p-warn{color:var(--warn);background:var(--warn-soft)}
+.p-neu{color:var(--muted);background:var(--surface-2)}
+.p-acc{color:var(--accent);background:var(--accent-soft)}
+.legend{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.82rem;color:var(--muted)}
+
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+tr.click{cursor:pointer} tr.click:hover td{background:var(--surface-2)}
+td .sub{display:block;color:var(--muted);font-size:.82rem}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-weight:600;font-size:.88rem}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.pri{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.btn.pri:hover{color:var(--on-accent);filter:brightness(1.08)}
+.btn.sm{padding:3px 9px;font-size:.8rem}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.between{justify-content:space-between}
+
+.people{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.person{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.person.sel{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.88rem}
+.kv dt{color:var(--muted)} .kv dd{margin:0}
+.timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;border-left:2px solid var(--line);padding-left:14px}
+.timeline li{position:relative;font-size:.9rem}
+.timeline li::before{content:"";position:absolute;left:-20px;top:.45em;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--accent)}
+.timeline time{font-family:var(--mono);font-size:.76rem;color:var(--muted);display:block}
+
+.doclist{display:flex;flex-direction:column;gap:6px}
+.doclist button{display:flex;gap:10px;align-items:center;justify-content:space-between;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px}
+.doclist button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.doclist span.t{min-width:0;font-weight:500}
+.viewer{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.paper{background:var(--paper);color:var(--paper-ink);border:1px solid var(--paper-line);border-radius:4px;padding:18px 20px;font-family:Georgia,"Times New Roman",serif;font-size:.86rem;line-height:1.75;box-shadow:0 1px 0 var(--paper-line),0 6px 18px rgba(0,0,0,.08);min-width:0}
+.paper h4{margin:0 0 2px;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;text-align:center;font-weight:700}
+.paper .sub{text-align:center;font-size:.74rem;margin-bottom:10px;border-bottom:1px solid var(--paper-line);padding-bottom:8px}
+.paper mark{background:var(--mark);color:inherit;padding:0 2px;border-radius:2px}
+.paper .jp{font-family:"Yu Mincho","Hiragino Mincho ProN","MS Mincho",serif;font-size:1rem}
+.paper .stamp{float:right;border:2px solid #9c2b22;color:#9c2b22;border-radius:50%;width:54px;height:54px;display:grid;place-items:center;font-size:.6rem;text-align:center;transform:rotate(-10deg);opacity:.75;margin:4px 0 0 8px}
+.fields{display:flex;flex-direction:column;gap:8px}
+.field{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center}
+.field label{font-size:.74rem;color:var(--muted);grid-column:1/-1}
+.field .v{font-weight:500;min-width:0;overflow-wrap:anywhere}
+.field.low{border-color:var(--warn)}
+.note{font-size:.84rem;border-radius:8px;padding:9px 11px;background:var(--surface-2);color:var(--muted)}
+.note.warn{background:var(--warn-soft);color:var(--warn)} .note.crit{background:var(--crit-soft);color:var(--crit)} .note.ok{background:var(--ok-soft);color:var(--ok)}
+.note b{color:inherit}
+
+.tree{display:flex;flex-direction:column;align-items:stretch;gap:0;max-width:560px}
+.node{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface);display:flex;flex-direction:column;gap:4px}
+.node b{font-family:var(--display)}
+.link{margin-left:22px;border-left:2px solid var(--line);padding:10px 0 10px 16px;display:flex;flex-direction:column;gap:6px;font-size:.86rem}
+.link.bad{border-left-color:var(--crit)} .link.wait{border-left-style:dashed;border-left-color:var(--warn)}
+
+details.item{border-bottom:1px solid var(--line)}
+details.item:last-child{border-bottom:0}
+details.item summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:10px 2px;align-items:center}
+details.item summary::-webkit-details-marker{display:none}
+details.item summary:hover{background:var(--surface-2)}
+details.item .more{padding:2px 2px 12px;display:grid;gap:6px;font-size:.86rem}
+.tag{font-family:var(--mono);font-size:.72rem;padding:1px 6px;border:1px solid var(--line);border-radius:4px;color:var(--muted);white-space:nowrap}
+
+.report{max-width:70ch;display:flex;flex-direction:column;gap:14px}
+.report h3{border-bottom:1px solid var(--line);padding-bottom:4px}
+.report ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.msg{white-space:pre-wrap;font-family:var(--body);background:var(--surface-2);border-radius:8px;padding:12px;font-size:.9rem;margin:0}
+
+.verdict{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;border-radius:12px;padding:16px;border:1px solid}
+.verdict.pend{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.verdict.ready{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.verdict b{font-family:var(--display);font-size:1.7rem;display:block;line-height:1.1}
+.verdict span{font-size:.86rem}
+.block{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.block:last-child{border-bottom:0}
+.block p{min-width:0}
+.diff{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px}
+.diff div{border-radius:8px;padding:10px;font-size:.88rem}
+.diff .a{background:var(--crit-soft)} .diff .b{background:var(--ok-soft)}
+.diff s{color:var(--crit)} .diff ins{color:var(--ok);text-decoration:none;font-weight:600}
+
+.rail .grp{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:12px 10px 4px;display:flex;align-items:center;gap:8px}
+.rail .grp i{width:8px;height:8px;border-radius:2px;background:var(--accent);flex:none}
+.rail .grp.off{opacity:.6} .rail .grp.off i{background:var(--muted)}
+.rail .soon{padding:4px 10px 6px 26px;font-size:.84rem;color:var(--muted)}
+.office{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 10px;font-size:.86rem}
+.office b{font-weight:600}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:6px 12px;font-weight:600;font-size:.86rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(210px,1fr);gap:12px;padding-bottom:6px}
+.col{background:var(--surface-2);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.col header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.col header b{font-family:var(--display);font-size:.92rem}
+.col header span{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+.col .gate{font-size:.74rem;color:var(--warn)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px;text-align:left;font-size:.86rem}
+button.card:hover{border-color:var(--accent)}
+.card .who{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:.78rem}
+.card.alert{box-shadow:inset 3px 0 0 var(--warn)}
+.empty{font-size:.8rem;color:var(--muted);padding:6px 2px}
+
+@media (max-width:860px){
+  .rail .grp,.rail .soon{display:none}
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .rail{position:static;flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:6px}
+  .rail button{white-space:nowrap;flex:none} .rail .sep{display:none} .rail small{margin-left:4px}
+  .viewer{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:no-preference){ main>*{animation:in .18s ease-out} @keyframes in{from{transform:translateY(4px)}to{transform:none}} }
+
+/* ---- Texturas próprias, geradas por ruído SVG embutido (nenhuma imagem externa) ---- */
+:root{
+  /* fibras longas do kraft */
+  --tex-kraft:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.008 .42' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .22 0 0 0 0 .11 0 0 0 0 .07 0 0 0 .9 -.3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+  /* manchas suaves do kraft */
+  --tex-blot:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='700'%3E%3Cfilter id='b' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .16 0 0 0 0 .08 0 0 0 0 .05 0 0 0 .7 -.22'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3C/svg%3E");
+  /* grão fino da folha */
+  --tex-grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' seed='23' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .29 0 0 0 0 .14 0 0 0 0 .1 0 0 0 .34 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  /* nuvens claras da folha, para ela parecer mais clara que o kraft */
+  --tex-cloud:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='640'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.011 .02' numOctaves='3' seed='31' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .98 0 0 0 0 .93 0 0 0 .95 -.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E");
+}
+body{background:var(--tex-grain),var(--tex-kraft),var(--tex-blot),var(--bg)}
+main{background:var(--tex-grain),var(--tex-cloud),var(--surface)}
+.top{background:var(--tex-grain),var(--bar)}
+.paper{background:var(--tex-grain),var(--tex-cloud),var(--paper)}
+.col{background:var(--tex-grain),var(--surface-2)}
+
+/* ---- Carta e máquina de escrever: aplicação do design system ---- */
+body{font-size:14px;line-height:1.6}
+h1{font-size:1.45rem;font-weight:700;letter-spacing:-.005em} h2{font-size:1.05rem;font-weight:700} h3{font-size:.95rem;font-weight:700}
+.panel,.btn,.card,.col,.person,.node,.field,.note,.pill,.tag,.flow button,.rail button,.doclist button,.seg,.office,.demo-tag,.seal,.verdict,.diff div,.msg,.paper{border-radius:0}
+.pill::before{border-radius:0}
+.top{background:var(--bar);padding:10px 14px;box-shadow:0 2px 0 rgba(73,36,26,.25)}
+.seal{background:var(--red);color:var(--bar);border:2px solid var(--red-edge)}
+.demo-tag{background:var(--spoiler);color:var(--bar);border:0;font-weight:700;letter-spacing:.01em}
+.office{background:var(--box);border:1.5px solid var(--fg);box-shadow:var(--shadow-input)}
+.rail button,.rail .grp,.rail .soon{color:var(--fg)}
+.rail button:hover{background:rgba(73,36,26,.12)}
+.rail button[aria-current="page"]{background:var(--fg);color:var(--bar)}
+.rail .sep{background:var(--fg);opacity:.4}
+main{background:var(--surface);box-shadow:var(--shadow-paper);padding:26px 28px 32px}
+.head .eyebrow{font-family:var(--hand);font-size:1.9rem;line-height:1;text-transform:none;letter-spacing:0;color:var(--sug);font-weight:400}
+.head{padding-bottom:14px;background:repeating-linear-gradient(90deg,var(--fg) 0 7px,transparent 7px 13px) bottom/100% 1.5px no-repeat}
+.panel{background:var(--box);border:1px solid var(--line)}
+.card,.person,.node,.doclist button{background:var(--box);border-color:var(--line)}
+.col{background:var(--surface-2);border:1px solid var(--line)}
+.panel .card,.panel .person,.panel .node{background:var(--surface)}
+.field{background:var(--box);border:1.5px solid var(--fg);box-shadow:var(--shadow-input)}
+.field .v{color:var(--sug);font-weight:700}
+.field.low{border-color:var(--warn)}
+th,td{border-bottom:1px dashed var(--line)}
+details.item{border-bottom:1px dashed var(--line)}
+.block{border-bottom:1px dashed var(--line)}
+.btn{background:var(--box);border:1.5px solid var(--fg);font-weight:500;transition:filter .15s,transform .08s}
+.btn:hover{border-color:var(--fg);color:var(--fg);background:var(--surface-2)}
+.btn:active{transform:translateY(2px)}
+.btn.pri{background:var(--red);color:var(--bar);border:3px solid var(--red-edge);letter-spacing:.01em}
+.btn.pri:hover{color:var(--bar);background:var(--red);filter:brightness(1.08)}
+.btn[disabled]{filter:saturate(.7);opacity:.6;cursor:default}
+.seg{border:1.5px solid var(--fg)} .seg button{background:var(--box);color:var(--fg)} .seg button[aria-pressed="true"]{background:var(--fg);color:var(--bar)}
+.doclist button[aria-pressed="true"]{background:var(--surface-2);border-color:var(--fg);box-shadow:inset 3px 0 0 var(--red)}
+.person.sel{border-color:var(--fg);box-shadow:inset 3px 0 0 var(--red)}
+.flow button{background:var(--surface);border:1px solid var(--line)} .flow button:hover{border-color:var(--red)}
+.pill{font-weight:700;border-radius:0} .p-crit{background:var(--spoiler);color:var(--bar)}
+.stat b{font-weight:700} .dot{border-radius:0;background:var(--red)}
+.paper{box-shadow:var(--shadow-paper);font-family:var(--mono);border:0}
+.paper .stamp{border-color:var(--red);color:var(--red);font-family:var(--mono)}
+.timeline{border-left:1.5px dashed var(--fg)} .timeline li::before{border-radius:0;border-color:var(--red);background:var(--box)}
+.link{border-left-color:var(--fg)} a{color:var(--fg)}
+:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+@media (max-width:860px){ main{padding:18px 14px 24px} .rail button{background:var(--bar)} .rail button[aria-current="page"]{background:var(--fg)} }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <div class="brand"><div class="seal" aria-hidden="true">侍</div><div><b>Samurai Vistos</b><div class="muted" style="font-size:.8rem">Mesa de processos · Visto japonês</div></div></div>
+    <div class="row"><span class="office"><span class="muted">Escritório</span><b>Samurai Vistos</b><span class="muted" aria-hidden="true">▾</span></span>
+    <span class="demo-tag">Protótipo de interface · caso e pessoas fictícios</span></div>
+  </header>
+  <div class="shell">
+    <nav class="rail" id="rail" aria-label="Telas"></nav>
+    <main id="main"></main>
+  </div>
+</div>
+
+<script>
+const VIEWS=[
+ {id:'visao',t:'Visão geral'},
+ {grp:'Módulo · Visto japonês'},
+ {id:'fila',t:'Processos'},
+ {id:'caso',t:'Caso'},
+ {id:'documentos',t:'Documentos'},
+ {id:'linhagem',t:'Linhagem'},
+ {id:'checklist',t:'Checklist'},
+ {id:'relatorio',t:'Relatório'},
+ {id:'revisao',t:'Revisão e prontidão'},
+ {grp:'Módulo · Visto americano',off:1,soon:'Próximo módulo'},
+ {grp:'Plataforma'},
+ {id:'regras',t:'Base de regras'},
+ {id:'alertas',t:'Alertas de mudança',tag:'planejado'}
+];
+const SRC={
+ 'SP-INDEX':{n:'Consulado em São Paulo:página de vistos',u:'https://www.sp.br.emb-japan.go.jp/itpr_pt/visto.html'},
+ 'SP-SANSEI':{n:'Consulado em São Paulo:lista Sansei sem COE',u:'https://www.sp.br.emb-japan.go.jp/files/000236341.pdf'}
+};
+// Checklist real da rota SANSEI_SEM_COE (matriz de requisitos do squad, verificada em 26/10/2026)
+const CHECK=[
+ {id:'passaporte',l:'Passaporte original',r:'BASE',s:'SP-SANSEI',sec:'instruções gerais',val:'validade superior a 6 meses',st:'ok',ev:'Passaporte válido até 2031'},
+ {id:'formulario',l:'Formulário de pedido de visto assinado',r:'BASE',s:'SP-SANSEI',sec:'instruções gerais e formulários',val:'—',st:'pend',ev:'Gerar e assinar na fase final'},
+ {id:'foto',l:'Foto 3,5 × 4,5 cm recente',r:'BASE',s:'SP-INDEX',sec:'instruções gerais',val:'menos de 6 meses',st:'pend',ev:'Ainda não recebida'},
+ {id:'identidade',l:'Documento de identidade autenticado',r:'BASE',s:'SP-SANSEI',sec:'instruções gerais',val:'—',st:'ok',ev:'RG autenticado em 30/10/2026'},
+ {id:'nasc_sol',l:'Certidão de nascimento da solicitante',r:'S-LINHAGEM',s:'SP-SANSEI',sec:'itens 6–12',val:'3 meses, em princípio',st:'doc',ev:'2ª via emitida em 02/10/2026'},
+ {id:'id_asc',l:'Identidade da ascendente (mãe)',r:'S-LINHAGEM',s:'SP-SANSEI',sec:'itens 6–12',val:'—',st:'ok',ev:'RG da mãe conferido'},
+ {id:'nasc_asc',l:'Certidão de nascimento da ascendente (mãe)',r:'S-LINHAGEM',s:'SP-SANSEI',sec:'itens 6–12',val:'3 meses, em princípio',st:'div',ev:'Sobrenome do avô difere do koseki'},
+ {id:'cas_pais',l:'Certidão de casamento dos pais',r:'S-LINHAGEM',s:'SP-SANSEI',sec:'itens 6–12',val:'3 meses, em princípio',st:'ok',ev:'2ª via emitida em 02/10/2026'},
+ {id:'id_avos',l:'Identidade dos avós',r:'S-LINHAGEM',s:'SP-SANSEI',sec:'itens 6–12',val:'—',st:'pend',ev:'Família está localizando',exc:'Certidão de óbito, quando aplicável'},
+ {id:'cas_avos',l:'Casamento dos avós ou registro no koseki',r:'S-LINHAGEM',s:'SP-SANSEI',sec:'itens 6–12',val:'—',st:'disp',ev:'Possível dispensa: casamento consta no koseki',exc:'Dispensado se o casamento constar no koseki. Uma pessoa precisa confirmar a dispensa'},
+ {id:'koseki',l:'Koseki (registro familiar japonês)',r:'S-LINHAGEM',s:'SP-SANSEI',sec:'itens 6–12',val:'1 ano',st:'ok',ev:'Emitido em 20/08/2026 · vale até 20/08/2027'},
+ {id:'sustento',l:'Comprovação de sustento (conforme cenário)',r:'S-SUSTENTO',s:'SP-SANSEI',sec:'itens 13–14, ramos A/B/C',val:'—',st:'pend',ev:'Escolher o cenário de garantidor',exc:'Familiar chamante · reentrada conjunta · solicitação conjunta'},
+ {id:'garantia',l:'Documentos do garantidor (conforme cenário)',r:'S-SUSTENTO',s:'SP-SANSEI',sec:'itens 13–14, ramos A/B/C',val:'3 meses',st:'pend',ev:'Depende do cenário escolhido',exc:'Alternativas de renda conforme o PDF oficial'},
+ {id:'ant_fed',l:'Antecedentes criminais (Polícia Federal)',r:'S-ANTECEDENTES',s:'SP-SANSEI',sec:'item 4',val:'90 dias',st:'warn',ev:'Emitido em 25/08/2026 · vence em 23/11/2026 (12 dias)'},
+ {id:'ant_est',l:'Antecedentes criminais (estadual)',r:'S-ANTECEDENTES',s:'SP-SANSEI',sec:'item 4',val:'90 dias',st:'pend',ev:'Ainda não emitido'},
+ {id:'pass_ant',l:'Passaportes anteriores com visto japonês',r:'HIST-PASS',s:'SP-SANSEI',sec:'passaportes anteriores',val:'—',st:'na',ev:'Não se aplica: sem visto japonês anterior (confirmado por Bruna em 05/11/2026)'}
+];
+const DOCS=[
+ {id:'d1',t:'Certidão de nascimento da Carla',item:'nasc_sol',conf:'alta',
+  paper:`<div class="stamp">2ª VIA<br>02/10/2026</div><h4>República Federativa do Brasil</h4><div class="sub">Registro Civil das Pessoas Naturais · Certidão de Nascimento</div>
+   Nome: <mark>CARLA MAYUMI ISHIKAWA PRADO</mark><br>Nascida em <mark>14 de março de 1992</mark>, em <mark>São Paulo — SP</mark><br>
+   Filiação: <mark>ROBERTO PRADO</mark> e <mark>HELENA TIEMI ISHIKAWA PRADO</mark><br>Avós maternos: <mark>KENJI ISHIKAWA</mark> e AIKO ISHIKAWA<br>
+   Matrícula: 000000 01 55 1992 1 00000 000 0000000 00<br>Certidão emitida em <mark>02 de outubro de 2026</mark>.`,
+  f:[['Nome registrado','Carla Mayumi Ishikawa Prado'],['Data de nascimento','14/03/1992'],['Local','São Paulo/SP'],['Mãe','Helena Tiemi Ishikawa Prado'],['Avô materno','Kenji Ishikawa'],['Data de emissão','02/10/2026 · vale até 02/01/2027']]},
+ {id:'d2',t:'Certidão de nascimento da Helena (mãe)',item:'nasc_asc',conf:'alta',
+  paper:`<div class="stamp">2ª VIA<br>02/10/2026</div><h4>República Federativa do Brasil</h4><div class="sub">Registro Civil das Pessoas Naturais · Certidão de Nascimento</div>
+   Nome: <mark>HELENA TIEMI ISHIKAWA</mark><br>Nascida em <mark>09 de julho de 1963</mark>, em <mark>Marília — SP</mark><br>
+   Filiação: <mark>KENJI ISHIKAVA</mark>, natural do Japão, e AIKO ISHIKAWA<br>Certidão emitida em <mark>02 de outubro de 2026</mark>.`,
+  f:[['Nome registrado','Helena Tiemi Ishikawa'],['Data de nascimento','09/07/1963'],['Local','Marília/SP'],['Pai','Kenji Ishikava','div'],['Data de emissão','02/10/2026 · vale até 02/01/2027']]},
+ {id:'d3',t:'Koseki da família Ishikawa',item:'koseki',conf:'baixa',
+  paper:`<div class="stamp">発行<br>2026.08.20</div><h4><span class="jp">戸籍謄本</span></h4><div class="sub">Registro familiar · cópia integral</div>
+   <span class="jp">本籍　<mark>熊本県</mark> ……</span><br><span class="jp">氏名　<mark>石川　健二</mark></span><br><span class="jp">生年月日　<mark>昭和拾弐年四月参日</mark></span><br>
+   <span class="jp">妻　<mark>愛子</mark>　婚姻 ……</span><br><span class="jp">長女　……</span><br>Emitido em <mark>20/08/2026</mark>.`,
+  f:[['Titular do registro','石川 健二 (Ishikawa Kenji)','low'],['Domicílio de registro','Kumamoto-ken','low'],['Data de nascimento','03/04/1937 (Shōwa 12)','low'],['Cônjuge registrada','愛子 (Aiko) — casamento consta','low'],['Data de emissão','20/08/2026 · vale até 20/08/2027']]}
+];
+const S={view:'visao',doc:'d1',ok:{},sim:false,fila:'quadro'};
+const CASES=[
+ ['JP-2026-0412','Família Ishikawa Prado · 3 pessoas','Dossiê','acc','Confirmar leitura de 3 documentos','Bruna','12/11',1],
+ ['JP-2026-0409','Yonsei · 1 pessoa','Triagem','neu','Aguardar certificado de idioma do cliente','Bruna','14/11'],
+ ['JP-2026-0415','Sansei sem COE · 2 pessoas','Triagem','neu','Completar o perfil do cônjuge','Bruna','15/11'],
+ ['JP-2026-0402','Yonsei · 1 pessoa','COE','acc','Aguardar retorno do responsável no Japão','Rafael','20/11'],
+ ['JP-2026-0398','Sansei com COE · 2 pessoas','Consular','ok','Protocolar no consulado','Dra. Paula','13/11'],
+ ['JP-2026-0391','Cônjuge de Sansei · 1 pessoa','Pendente','warn','Antecedentes vencem em 5 dias','Bruna','16/11',0,1],
+ ['JP-2026-0377','Sansei sem COE · 1 pessoa','Aguardando decisão','neu','Acompanhar resposta do consulado','Rafael','—'],
+ ['JP-2026-0370','Residente em Curitiba/PR','Encaminhado','crit','Fora da área do Consulado em São Paulo','—','—']];
+const COLS=[['Triagem'],['Pendente'],['Dossiê'],['COE'],['Consular','só abre com parecer PRONTO'],['Aguardando decisão','exige comprovante de protocolo']];
+const $=s=>document.querySelector(s);
+const pill=(c,t)=>`<span class="pill p-${c}">${t}</span>`;
+const stPill=st=>({ok:pill('ok','Conferido'),pend:pill('neu','Pendente'),warn:pill('warn','Vencendo'),div:pill('crit','Divergência'),disp:pill('sug','Dispensa a confirmar'),na:pill('neu','Não se aplica')})[st];
+function docDone(d){return d.f.every((x,i)=>S.ok[d.id+i])}
+function itemSt(c){ if(S.sim&&c.st!=='na')return 'ok'; if(c.st==='doc'){return docDone(DOCS[0])?'ok':'pend'} return c.st }
+function counts(){const a=CHECK.filter(c=>c.st!=='na');const ok=a.filter(c=>itemSt(c)==='ok').length;return {ok,total:a.length,open:a.length-ok}}
+const head=(e,t,p)=>`<div class="head"><span class="eyebrow">${e}</span><h1>${t}</h1><p>${p}</p></div>`;
+const go=id=>`data-go="${id}"`;
+
+const R={
+visao(){return head('Samurai Vistos','Do documento solto ao parecer com fonte','Esta é uma demonstração navegável de como um escritório cuidaria de um processo de visto japonês de descendente. As telas são um protótipo; as regras que elas mostram são as que a Samurai Vistos já usa hoje.')+`
+ <div class="grid g4">
+  <div class="panel stat"><b>7</b><span>rotas de visto cobertas (Sansei, filho, cônjuge e Yonsei)</span></div>
+  <div class="panel stat"><b>15</b><span>regras de documentos, cada uma ligada à fonte oficial</span></div>
+  <div class="panel stat"><b>30</b><span>testes automáticos que as regras passam</span></div>
+  <div class="panel stat"><b>8</b><span>etapas do processo, com histórico de cada mudança</span></div>
+ </div>
+ <div class="panel"><h2>O caminho de um processo</h2>
+  <div class="flow">
+   <button ${go('caso')}><b>Abrir</b><span>Perfil mínimo de cada pessoa e rota candidata</span></button>
+   <button ${go('documentos')}><b>Coletar</b><span>Subir documentos e confirmar o que foi lido</span></button>
+   <button ${go('linhagem')}><b>Comprovar</b><span>Cadeia de parentesco com prova em cada elo</span></button>
+   <button ${go('checklist')}><b>Organizar</b><span>Checklist por pessoa, com fonte e validade</span></button>
+   <button ${go('relatorio')}><b>Relatar</b><span>Relatório, pendências e mensagem ao cliente</span></button>
+   <button ${go('revisao')}><b>Revisar</b><span>Segunda conferência e parecer de prontidão</span></button>
+  </div></div>
+ <div class="grid g2">
+  <div class="panel"><h2>O que já funciona hoje</h2><ul class="list">
+   <li><span class="dot"></span><span>Escolhe a rota de documentos pelo perfil da pessoa e encaminha o caso quando ele sai da cobertura.</span></li>
+   <li><span class="dot"></span><span>Monta a checklist de cada pessoa levando em conta a idade, o histórico e o responsável legal.</span></li>
+   <li><span class="dot"></span><span>Aponta o que impede a entrega: documento que falta, venceu ou está ilegível, linhagem com divergência e fonte que ninguém reconferiu.</span></li>
+   <li><span class="dot"></span><span>Lê os documentos e redige o relatório inicial e a mensagem de coleta. Isso já foi usado em atendimento real.</span></li>
+  </ul><p class="note" style="margin-top:12px">Hoje isso roda com agentes de IA operados pela Samurai Vistos. O aplicativo é a forma de colocar o mesmo método nas mãos da equipe do escritório.</p></div>
+  <div class="panel"><h2>Regras que o sistema não quebra</h2><ul class="list">
+   <li><span class="dot"></span><span>Todo requisito mostra a fonte oficial e a data em que foi conferida.</span></li>
+   <li><span class="dot"></span><span>O que a IA lê é sugestão até uma pessoa confirmar.</span></li>
+   <li><span class="dot"></span><span>Quem revisa o pacote não é quem o montou.</span></li>
+   <li><span class="dot"></span><span>"Pronto" quer dizer que o pacote foi conferido para a entrega. Ninguém promete o visto.</span></li>
+   <li><span class="dot"></span><span>Protocolar, assinar e enviar continuam sendo atos do escritório.</span></li>
+  </ul><p class="note" style="margin-top:12px">Cobertura atual: brasileiros atendidos pelo Consulado do Japão em São Paulo. A etapa do Certificado de Elegibilidade (COE) é organizada, mas a conferência final é de um profissional no Japão.</p></div>
+ </div>`},
+
+fila(){const rows=CASES;const q=S.fila==='quadro';
+ const card=r=>`<${r[7]?`button ${go('caso')}`:'div'} class="card ${r[8]?'alert':''}"><span class="mono">${r[0]}</span><b style="font-weight:600">${r[1]}</b><span>${r[4]}</span><span class="who"><span>${r[5]}</span><span class="num">${r[6]}</span></span></${r[7]?'button':'div'}>`;
+ const top=head('Processos','O que precisa de atenção hoje','Cada processo aparece na etapa em que está, com a próxima ação e quem deve agir. As etapas vêm do módulo de visto; outro tipo de visto traz as suas.')+`
+ <div class="row between"><div class="seg" role="group" aria-label="Modo de exibição"><button data-fila="quadro" aria-pressed="${q}">Quadro</button><button data-fila="lista" aria-pressed="${!q}">Lista</button></div>
+  <span class="muted" style="font-size:.84rem">${rows.length} processos · clique no JP-2026-0412 para abrir</span></div>`;
+ if(q)return top+`<div class="scroll"><div class="board">${COLS.map(c=>{const it=rows.filter(r=>r[2]===c[0]);return `<section class="col"><header><b>${c[0]}</b><span>${it.length}</span></header>${c[1]?`<span class="gate">🔒 ${c[1]}</span>`:''}${it.map(card).join('')||'<span class="empty">Nenhum processo</span>'}</section>`}).join('')}</div></div>
+ <p class="note">Mudar um processo de etapa sempre pede motivo e responsável, e fica no histórico. As colunas com cadeado só aceitam o processo quando a condição foi cumprida. Há ainda 1 processo encaminhado, fora da área de cobertura.</p>`;
+ return top+`
+ <div class="panel"><div class="scroll"><table><thead><tr><th>Caso</th><th>Etapa</th><th>Próxima ação</th><th>Responsável</th><th>Prazo</th></tr></thead><tbody>
+ ${rows.map(r=>`<tr ${r[7]?`class="click" ${go('caso')} tabindex="0"`:''}><td><span class="mono">${r[0]}</span><span class="sub">${r[1]}</span></td><td>${pill(r[3],r[2])}</td><td>${r[4]}</td><td>${r[5]}</td><td class="num">${r[6]}</td></tr>`).join('')}
+ </tbody></table></div></div>`},
+
+caso(){const c=counts();return head('Caso JP-2026-0412','Família Ishikawa Prado','Cada pessoa é classificada sozinha: a rota, a lista de documentos e a revisão de uma não valem para a outra.')+`
+ <div class="people">
+  <div class="person sel"><div class="row between"><h3>Carla, 34</h3>${pill('acc','Dossiê')}</div>
+   <dl class="kv"><dt>Vínculo</dt><dd>Neta de japonês ${pill('dec','declarado')}</dd><dt>Reside</dt><dd>São Paulo/SP</dd><dt>COE</dt><dd>Não emitido</dd><dt>Rota candidata</dt><dd><span class="tag">SANSEI_SEM_COE</span></dd></dl>
+   <p class="muted" style="font-size:.84rem">${c.ok} de ${c.total} itens conferidos</p>
+   <div class="row"><button class="btn sm pri" ${go('documentos')}>Documentos</button><button class="btn sm" ${go('checklist')}>Checklist</button></div></div>
+  <div class="person"><div class="row between"><h3>Diego, 36</h3>${pill('neu','Triagem')}</div>
+   <dl class="kv"><dt>Vínculo</dt><dd>Cônjuge de Carla</dd><dt>Reside</dt><dd>São Paulo/SP</dd><dt>COE</dt><dd>Não emitido</dd><dt>Rota candidata</dt><dd><span class="tag">CONJUGE_SEM_COE</span></dd></dl>
+   <p class="muted" style="font-size:.84rem">Depende da comprovação da linhagem de Carla</p></div>
+  <div class="person"><div class="row between"><h3>Theo, 9</h3>${pill('neu','Triagem')}</div>
+   <dl class="kv"><dt>Vínculo</dt><dd>Filho de Carla</dd><dt>Condição</dt><dd>Menor, solteiro, dependente ${pill('dec','declarado')}</dd><dt>COE</dt><dd>Não emitido</dd><dt>Rota candidata</dt><dd><span class="tag">FILHO_SANSEI_SEM_COE</span></dd></dl>
+   <p class="muted" style="font-size:.84rem">Exige documentos e assinatura do responsável legal</p></div>
+ </div>
+ <p class="note">A rota candidata serve para começar a organizar os documentos. Quem confirma o enquadramento é uma pessoa do escritório, e o app registra quem foi e em que ela se baseou.</p>
+ <div class="grid g2">
+  <div class="panel"><h2>Próxima ação</h2><p><b>Confirmar a leitura de 3 documentos de Carla</b></p><p class="muted">Responsável: Bruna (assessora) · prazo 12/11/2026</p>
+   <div class="row" style="margin-top:12px"><button class="btn pri" ${go('documentos')}>Ir para os documentos</button></div></div>
+  <div class="panel"><h2>Linha do tempo</h2><ol class="timeline">
+   <li><time>10/11/2026 · Bruna</time>8 documentos de Carla recebidos e enviados para leitura.</li>
+   <li><time>05/11/2026 · Bruna</time>Carla: Triagem → Dossiê. Motivo: perfil mínimo completo e rota candidata definida.</li>
+   <li><time>03/11/2026 · Bruna</time>Caso aberto com 3 pessoas. Consentimento de uso dos dados registrado.</li></ol></div>
+ </div>`},
+
+documentos(){const d=DOCS.find(x=>x.id===S.doc);const done=docDone(d);
+ return head('Documentos · Carla','Conferir em vez de digitar','O sistema lê o documento e propõe os campos. Nada vale como conferido até a assessora confirmar.')+`
+ <div class="legend">${pill('ok','Comprovado')} ligado a um documento conferido ${pill('dec','Declarado')} dito pelo cliente ${pill('sug','Sugerido')} lido pela IA, aguardando confirmação</div>
+ <div class="grid" style="grid-template-columns:minmax(0,1fr)">
+  <div class="panel"><h3>Documentos recebidos</h3><div class="doclist">
+   ${DOCS.map(x=>`<button aria-pressed="${x.id===S.doc}" data-doc="${x.id}"><span class="t">${x.t}</span>${docDone(x)?pill('ok','Conferido'):x.f.some(f=>f[2]==='div')?pill('crit','Divergência'):pill('sug','A confirmar')}</button>`).join('')}
+   <button disabled style="opacity:.6;cursor:default"><span class="t">Outros 5 documentos (passaporte, RG, casamento dos pais, RG da mãe, antecedentes)</span>${pill('ok','Conferidos')}</button>
+  </div></div>
+  <div class="panel"><div class="row between" style="margin-bottom:12px"><h3>${d.t}</h3><span class="muted" style="font-size:.84rem">Leitura com confiança ${d.conf}</span></div>
+   <div class="viewer">
+    <div class="paper">${d.paper}</div>
+    <div class="fields">
+     ${d.f.map((f,i)=>{const ok=S.ok[d.id+i];return `<div class="field ${f[2]==='low'&&!ok?'low':''}"><label>${f[0]}</label><span class="v">${f[1]}</span>${ok?pill('ok','Comprovado'):f[2]==='div'?pill('crit','Divergência'):`<button class="btn sm" data-ok="${d.id+i}">Confirmar</button>`}</div>`}).join('')}
+     ${d.id==='d2'?`<p class="note crit"><b>Divergência entre documentos.</b> Aqui o pai aparece como “Kenji Ishikava”; no koseki e na certidão de Carla, “Ishikawa”. O sistema aponta a diferença e não decide qual está certa.</p>`:''}
+     ${d.id==='d3'?`<p class="note warn"><b>Documento em japonês.</b> Koseki é tratado como leitura de baixa confiança: cada campo precisa ser conferido com o original.</p>`:''}
+     ${done?`<p class="note ok"><b>Documento conferido.</b> Os dados passaram de declarados a comprovados e o item da checklist foi atualizado.</p>`:`<div class="row"><button class="btn pri" data-all="${d.id}">Confirmar todos os campos</button></div>`}
+    </div>
+   </div></div>
+ </div>`},
+
+linhagem(){const ok1=docDone(DOCS[0])||S.sim;const fix=S.sim;return head('Linhagem · Carla','Uma prova para cada elo','O app mostra a descendência elo por elo. O elo que não tem documento fica pendente, e qualquer diferença entre os documentos aparece aqui.')+`
+ <div class="panel"><div class="tree">
+  <div class="node"><span class="eyebrow">Avô · japonês</span><b>Kenji Ishikawa <span class="paper jp" style="padding:0 6px;border:0;box-shadow:none;font-size:.9rem">石川 健二</span></b><div class="row">${pill('ok','Koseki emitido em 20/08/2026')}</div></div>
+  <div class="link ${fix?'':'bad'}"><span><b>Pai de Helena</b>, pela certidão de nascimento de Helena</span>
+   ${fix?pill('ok','Elo comprovado'):`${pill('crit','Divergência de sobrenome')}<span class="muted">Certidão: “Ishikava” · Koseki: “Ishikawa”. Caminho usual: retificação da certidão ou declaração explicativa, a decidir com o responsável.</span>`}</div>
+  <div class="node"><span class="eyebrow">Mãe · segunda geração</span><b>Helena Tiemi Ishikawa Prado</b><div class="row">${pill('ok','RG conferido')}</div></div>
+  <div class="link ${ok1?'':'wait'}"><span><b>Mãe de Carla</b>, pela certidão de nascimento de Carla</span>${ok1?pill('ok','Elo comprovado'):pill('sug','Leitura a confirmar')}</div>
+  <div class="node"><span class="eyebrow">Solicitante · terceira geração</span><b>Carla Mayumi Ishikawa Prado</b><div class="row">${pill('ok','Passaporte e RG conferidos')}</div></div>
+ </div></div>
+ <div class="row">${ok1?'':`<button class="btn" ${go('documentos')}>Confirmar a certidão de Carla</button>`}<button class="btn" ${go('checklist')}>Ver a checklist</button></div>
+ <p class="note">Enquanto houver divergência aberta na linhagem, o pacote não pode ser dado como pronto.</p>`},
+
+checklist(){const c=counts();return head('Checklist · Carla','Os documentos que a Carla precisa entregar',`Lista gerada pela rota <span class="tag">SANSEI_SEM_COE</span>, com as condições de idade e histórico já aplicadas. Abra um item para ver a regra e a fonte.`)+`
+ <div class="row between"><div class="legend"><b style="color:var(--fg)">${c.ok} de ${c.total}</b> conferidos · ${c.open} em aberto</div>
+  <span class="muted" style="font-size:.84rem">Regras verificadas na fonte em 26/10/2026</span></div>
+ <div class="panel">${CHECK.map(x=>{const st=itemSt(x);const s=SRC[x.s];return `<details class="item"><summary><span><b style="font-weight:600">${x.l}</b><span class="muted" style="display:block;font-size:.84rem">${st==='ok'&&x.st!=='ok'?'Conferido':x.ev}</span></span>${stPill(st)}</summary>
+   <div class="more"><div class="row"><span class="tag">regra ${x.r}</span><span class="tag">fonte ${x.s}</span><span class="tag">${x.sec}</span></div>
+   <div><span class="muted">Validade do documento:</span> ${x.val}</div>${x.exc?`<div><span class="muted">Exceções previstas:</span> ${x.exc}</div>`:''}
+   <div><span class="muted">Fonte oficial:</span> <a href="${s.u}" target="_blank" rel="noopener">${s.n}</a></div></div></details>`}).join('')}</div>`},
+
+relatorio(){const c=counts();const msg=`Olá, Carla! Tudo bem?
+
+Conferimos os documentos que você enviou. Para seguir com o seu processo, ainda precisamos de:
+
+1. Foto 3,5 × 4,5 cm recente (tirada há menos de 6 meses).
+2. Documento de identidade dos seus avós maternos, se a família tiver.
+3. Certidão de antecedentes criminais estadual.
+4. Nova certidão de antecedentes da Polícia Federal: a atual vence em 23/11.
+
+Também encontramos uma diferença: na certidão de nascimento da sua mãe, o sobrenome do seu avô aparece como "Ishikava", e nos outros documentos como "Ishikawa". Vamos te orientar sobre como resolver.
+
+Qualquer dúvida, é só chamar.`;
+ return head('Relatório · caso JP-2026-0412','Relatório e mensagem para a cliente','O relatório sai sempre na mesma estrutura. Nasce como rascunho: a assessora edita e é ela quem envia.')+`
+ <div class="grid g2">
+  <div class="panel"><div class="row between" style="margin-bottom:12px"><h2>Relatório inicial e pendências</h2>${pill('sug','Rascunho')}</div><div class="report">
+   <div><h3>Rota e etapa</h3><p>Carla: rota candidata Sansei sem COE, etapa Dossiê. Diego e Theo em Triagem, aguardando a linhagem de Carla.</p></div>
+   <div><h3>Confirmado</h3><ul><li>Identidade e passaporte de Carla.</li><li>Koseki do avô, emitido em 20/08/2026.</li><li>Casamento dos pais e identidade da mãe.</li><li>${c.ok} de ${c.total} itens da checklist conferidos.</li></ul></div>
+   <div><h3>Pendências</h3><ul><li>Divergência de sobrenome do avô na certidão da mãe. <span class="tag">SP-SANSEI · itens 6–12</span></li><li>Antecedentes da Polícia Federal vencem em 23/11/2026. <span class="tag">SP-SANSEI · item 4</span></li><li>Cenário de garantidor ainda não escolhido. <span class="tag">SP-SANSEI · itens 13–14</span></li><li>Foto, antecedentes estaduais e identidade dos avós não recebidos.</li></ul></div>
+   <div><h3>Responsável e próxima ação</h3><p>Bruna envia a mensagem de coleta até 12/11/2026. O responsável do escritório decide como tratar a divergência.</p></div>
+   <p class="muted" style="font-size:.8rem">Gerado em 11/11/2026 · base de regras de 26/10/2026 · não é parecer de elegibilidade.</p></div></div>
+  <div class="panel"><div class="row between" style="margin-bottom:12px"><h2>Mensagem ao cliente</h2>${pill('sug','Rascunho')}</div>
+   <pre class="msg" id="msg">${msg}</pre>
+   <div class="row" style="margin-top:12px"><button class="btn pri" id="copy">Copiar mensagem</button><span class="muted" id="copied" style="font-size:.84rem">O sistema não envia nada sozinho.</span></div></div>
+ </div>`},
+
+revisao(){const c=counts();const lin=!S.sim;const bl=S.sim?[]:[
+ [`${c.open} itens da checklist ainda não conferidos`,'checklist','Ver itens'],
+ ['Linhagem com divergência aberta','linhagem','Ver linhagem'],
+ ['Enquadramento da rota ainda não confirmado por uma pessoa'],
+ ['Cenário de garantidor e dispensas sem confirmação'],
+ ['Fontes oficiais a reabrir hoje: SP-INDEX e SP-SANSEI'],
+ ['Revisor precisa ser diferente de quem montou o pacote (montado por Bruna)'],
+ ['Falta o aceite do responsável do escritório']];
+ return head('Revisão e prontidão · Carla','O que impede a entrega','O app calcula o parecer com regras fixas e testadas. Enquanto houver um bloqueio, o pacote não sai como pronto.')+`
+ <div class="verdict ${S.sim?'ready':'pend'}"><div><span class="eyebrow" style="color:inherit">Parecer do pacote consular</span><b>${S.sim?'PRONTO':'PENDENTE'}</b>
+  <span>${S.sim?'Pacote conferido para entrega ao consulado. Não é aprovação do visto nem garantia de resultado.':bl.length+' bloqueios a resolver antes da entrega.'}</span></div>
+  <button class="btn" id="sim">${S.sim?'Voltar ao estado real do caso':'Simular pendências resolvidas'}</button></div>
+ ${S.sim?`<div class="grid g2"><div class="panel"><h2>O que foi conferido</h2><ul class="list">
+   <li><span class="dot"></span><span>${c.total} de ${c.total} itens da checklist, com evidência e validade.</span></li>
+   <li><span class="dot"></span><span>Linhagem comprovada em todos os elos.</span></li>
+   <li><span class="dot"></span><span>Fontes SP-INDEX e SP-SANSEI reabertas hoje por Rafael.</span></li>
+   <li><span class="dot"></span><span>Montado por Bruna, revisado por Rafael, aceite de Dra. Paula.</span></li></ul></div>
+  <div class="panel"><h2>O que acontece depois</h2><ul class="list">
+   <li><span class="dot"></span><span>O escritório protocola no consulado e anexa o comprovante.</span></li>
+   <li><span class="dot"></span><span>Se vier exigência, a etapa reabre e o pronto deixa de valer.</span></li>
+   <li><span class="dot"></span><span>O caso só encerra com a decisão registrada.</span></li></ul></div></div>
+  <p class="note">Simulação para a demonstração. No caso real, cada bloqueio só cai com registro de quem resolveu e com qual evidência.</p>`
+ :`<div class="panel"><h2>Bloqueios</h2>${bl.map(b=>`<div class="block"><p>${b[0]}</p>${b[1]?`<button class="btn sm" ${go(b[1])}>${b[2]}</button>`:''}</div>`).join('')}</div>
+  <p class="note warn"><b>Atenção à validade:</b> os antecedentes da Polícia Federal vencem em 23/11/2026. Se a entrega ficar para depois dessa data, o documento passa a bloquear o pacote.</p>`}`},
+
+regras(){const rows=[
+ ['BASE','Todas as rotas','Passaporte, formulário, foto, identidade','SP-INDEX','ok','Verificada'],
+ ['S-LINHAGEM','Sansei sem COE','Certidões da cadeia familiar e koseki','SP-SANSEI','ok','Verificada'],
+ ['S-SUSTENTO','Sansei sem COE','Sustento e garantidor, por cenário A/B/C','SP-SANSEI','ok','Verificada'],
+ ['S-ANTECEDENTES','Sansei e cônjuge sem COE','Antecedentes federal e estadual, 90 dias','SP-SANSEI','ok','Verificada'],
+ ['S-COE','Sansei com COE','COE e certidões essenciais','SP-SANSEI-COE','ok','Verificada'],
+ ['F-FILHO','Filho de Sansei sem COE','Certidões, koseki, sustento e garantia','SP-FILHO','ok','Verificada'],
+ ['F-16','Filho de Sansei, 16 anos ou mais','Nascimento em inteiro teor, traduzido, 2 meses','SP-FILHO','ok','Verificada'],
+ ['C-CASAMENTO','Cônjuge de Sansei','Certidão de casamento recente, 2 meses','SP-CONJUGE','ok','Verificada'],
+ ['Y-COE','Programa Yonsei, fase consular','COE emitido','SP-YONSEI','ok','Verificada'],
+ ['Y-ELEGIBILIDADE','Programa Yonsei, antes do COE','Idade, idioma, apoiador, linhagem','ISA-YONSEI','warn','Parcial: bloqueia conclusões']];
+ return head('Base de regras','Toda exigência tem fonte e data','Cada regra aponta a fonte oficial, o trecho consultado e o dia em que alguém conferiu. Quando a fonte está incompleta, a regra trava tudo o que depende dela.')+`
+ <div class="panel"><div class="scroll"><table><thead><tr><th>Regra</th><th>Quando se aplica</th><th>O que exige</th><th>Fonte</th><th>Situação</th></tr></thead><tbody>
+ ${rows.map(r=>`<tr><td><span class="tag">${r[0]}</span></td><td>${r[1]}</td><td>${r[2]}</td><td><span class="mono">${r[3]}</span></td><td>${pill(r[4],r[5])}</td></tr>`).join('')}
+ </tbody></table></div><p class="muted" style="margin-top:10px;font-size:.84rem">10 das 15 regras. Fontes do Consulado-Geral do Japão em São Paulo e da agência de imigração do Japão, verificadas em 26/10/2026.</p></div>`},
+
+alertas(){return head('Alertas de mudança','Aviso quando uma regra muda','Em construção. O sistema vai reconferir as fontes oficiais toda semana e trazer a mudança já analisada. Nada muda na base sem aprovação do responsável pelas regras.')+`
+ <p class="note warn"><b>Exemplo ilustrativo.</b> O alerta abaixo é fictício e mostra apenas como a tela vai funcionar.</p>
+ <div class="panel"><div class="row between" style="margin-bottom:10px"><h2>Lista Sansei sem COE foi alterada</h2>${pill('sug','Proposta a aprovar')}</div>
+  <p class="muted" style="margin-bottom:12px">Fonte <span class="mono">SP-SANSEI</span> · mudança detectada na verificação semanal</p>
+  <div class="diff"><div class="a"><span class="eyebrow">Antes</span><p>Certidão de antecedentes criminais emitida há no máximo <s>90 dias</s>.</p></div>
+   <div class="b"><span class="eyebrow">Depois</span><p>Certidão de antecedentes criminais emitida há no máximo <ins>60 dias</ins>.</p></div></div>
+  <div class="grid g2" style="margin-top:14px"><div><h3>Regra afetada</h3><p><span class="tag">S-ANTECEDENTES</span> validade dos antecedentes</p></div>
+   <div><h3>Casos em aberto afetados</h3><p>3 casos em 2 escritórios seriam avisados para reconferir.</p></div></div>
+  <div class="row" style="margin-top:14px"><button class="btn pri" disabled>Aprovar</button><button class="btn" disabled>Editar</button><button class="btn" disabled>Descartar</button></div></div>`}
+};
+
+function rail(){let n=0;$('#rail').innerHTML=VIEWS.map(v=>v.grp?`<div class="grp ${v.off?'off':''}"><i></i>${v.grp}</div>${v.soon?`<div class="soon">${v.soon}</div>`:''}`:`<button data-go="${v.id}" ${v.id===S.view?'aria-current="page"':''}><span class="n">${v.id==='visao'||v.id==='regras'||v.id==='alertas'?'·':++n}</span>${v.t}${v.tag?`<small>${v.tag}</small>`:''}</button>`).join('')}
+function render(keep){rail();$('#main').innerHTML=R[S.view]();if(!keep)window.scrollTo(0,0)}
+function nav(id){if(!R[id])return;S.view=id;try{history.replaceState(null,'','#'+id)}catch(e){location.hash=id}render()}
+document.addEventListener('click',e=>{
+ const g=e.target.closest('[data-go]');if(g){nav(g.dataset.go);return}
+ const fl=e.target.closest('[data-fila]');if(fl){S.fila=fl.dataset.fila;render(1);return}
+ const d=e.target.closest('[data-doc]');if(d){S.doc=d.dataset.doc;render(1);return}
+ const k=e.target.closest('[data-ok]');if(k){S.ok[k.dataset.ok]=1;render(1);return}
+ const a=e.target.closest('[data-all]');if(a){const doc=DOCS.find(x=>x.id===a.dataset.all);doc.f.forEach((f,i)=>{if(f[2]!=='div')S.ok[doc.id+i]=1});render(1);return}
+ if(e.target.id==='sim'){S.sim=!S.sim;render(1);return}
+ if(e.target.id==='copy'){const t=$('#msg').textContent;const done=()=>{$('#copied').textContent='Mensagem copiada.'};
+   try{navigator.clipboard.writeText(t).then(done,()=>sel())}catch(x){sel()}
+   function sel(){const r=document.createRange();r.selectNodeContents($('#msg'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('#copied').textContent='Texto selecionado: copie com Ctrl+C.'}}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('tr[data-go]'))nav(e.target.dataset.go)});
+function fromHash(){const h=location.hash.replace('#','');if(R[h])S.view=h;render()}
+window.addEventListener('hashchange',fromHash);fromHash();
+</script>
+
+</body>
+</html>
