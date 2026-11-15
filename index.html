@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
 <meta name="description" content="Demonstração navegável de um processo de visto japonês de descendente, com caso fictício.">
-<style>html{color-scheme:light}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Protótipo Samurai Vistos</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<meta name="text-scale" content="scale">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&family=Reenie+Beanie&display=swap">
 <style>
 /* Layout: mesa de trabalho — trilho de etapas à esquerda, área de trabalho à direita; no celular o trilho vira faixa rolável. */
@@ -29,7 +30,7 @@
 }
 
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:.9375rem;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px}
 h1,h2,h3{font-family:var(--display);font-weight:600;text-wrap:balance;margin:0;line-height:1.2}
 h1{font-size:1.55rem} h2{font-size:1.15rem} h3{font-size:1rem}
@@ -49,9 +50,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 .shell{display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;align-items:start}
 .rail{display:flex;flex-direction:column;gap:2px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
-.rail button{display:flex;align-items:center;gap:10px;text-align:left;border:0;background:none;padding:9px 10px;border-radius:8px;color:var(--muted);font-weight:500}
-.rail button:hover{background:var(--surface-2);color:var(--fg)}
-.rail button[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.rail a{display:flex;align-items:center;gap:10px;text-align:left;border:0;background:none;padding:9px 10px;border-radius:8px;color:var(--muted);font-weight:500}
+.rail a:hover{background:var(--surface-2);color:var(--fg)}
+.rail a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
 .rail .n{font-family:var(--mono);font-size:.72rem;width:18px;opacity:.7}
 .rail .sep{height:1px;background:var(--line);margin:8px 4px}
 .rail small{font-size:.68rem;border:1px solid currentColor;border-radius:999px;padding:0 6px;margin-left:auto;opacity:.8}
@@ -186,14 +187,35 @@ button.card:hover{border-color:var(--accent)}
 .card.alert{box-shadow:inset 3px 0 0 var(--warn)}
 .empty{font-size:.8rem;color:var(--muted);padding:6px 2px}
 
-@media (max-width:860px){
+@media (max-width:53.75em){
   .rail .grp,.rail .soon{display:none}
   .shell{grid-template-columns:minmax(0,1fr)}
   .rail{position:static;flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:6px}
-  .rail button{white-space:nowrap;flex:none} .rail .sep{display:none} .rail small{margin-left:4px}
+  .rail a{white-space:nowrap;flex:none} .rail .sep{display:none} .rail small{margin-left:4px}
   .viewer{grid-template-columns:minmax(0,1fr)}
 }
-@media (prefers-reduced-motion:no-preference){ main>*{animation:in .18s ease-out} @keyframes in{from{transform:translateY(4px)}to{transform:none}} }
+.rail a{text-decoration:none}
+#main h1[tabindex="-1"]:focus{outline:none}
+@media (prefers-reduced-motion:reduce){ ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none !important} }
+
+/* Aviso de que o quadro rola para o lado: a borda esmaece enquanto houver colunas além dela */
+@property --fade-start{syntax:"<length>";inherits:false;initial-value:0px}
+@property --fade-end{syntax:"<length>";inherits:false;initial-value:0px}
+@supports (animation-timeline:scroll()){
+  .fade-x{--fade-size:3rem;scroll-padding-inline:var(--fade-size);
+    mask:linear-gradient(black,black) no-clip subtract,
+      linear-gradient(to right,black,transparent) 0 0 / var(--fade-start) 100% no-repeat no-clip,
+      linear-gradient(to right,transparent,black) 100% 0 / var(--fade-end) 100% no-repeat no-clip;
+    animation:reveal-fade-start linear both,hide-fade-end linear both;
+    animation-timeline:scroll(self inline);
+    animation-range:0 var(--fade-size),calc(100% - var(--fade-size)) 100%}
+}
+@keyframes reveal-fade-start{to{--fade-start:var(--fade-size)}}
+@keyframes hide-fade-end{from{--fade-end:var(--fade-size)}}
+
+.copy{display:inline-flex;align-items:center;gap:10px}
+.copy .tip{font-weight:700;font-size:.84rem}
+.copy button[data-copied]+.tip{color:var(--ok)} .copy button[data-failed]+.tip{color:var(--crit)}
 
 /* ---- Texturas próprias, geradas por ruído SVG embutido (nenhuma imagem externa) ---- */
 :root{
@@ -213,17 +235,17 @@ main{background:var(--tex-grain),var(--tex-cloud),var(--surface)}
 .col{background:var(--tex-grain),var(--surface-2)}
 
 /* ---- Carta e máquina de escrever: aplicação do design system ---- */
-body{font-size:14px;line-height:1.6}
+body{font-size:.875rem;line-height:1.6;font-size-adjust:from-font}
 h1{font-size:1.45rem;font-weight:700;letter-spacing:-.005em} h2{font-size:1.05rem;font-weight:700} h3{font-size:.95rem;font-weight:700}
-.panel,.btn,.card,.col,.person,.node,.field,.note,.pill,.tag,.flow button,.rail button,.doclist button,.seg,.office,.demo-tag,.seal,.verdict,.diff div,.msg,.paper{border-radius:0}
+.panel,.btn,.card,.col,.person,.node,.field,.note,.pill,.tag,.flow button,.rail a,.doclist button,.seg,.office,.demo-tag,.seal,.verdict,.diff div,.msg,.paper{border-radius:0}
 .pill::before{border-radius:0}
 .top{background:var(--bar);padding:10px 14px;box-shadow:0 2px 0 rgba(73,36,26,.25)}
 .seal{background:var(--red);color:var(--bar);border:2px solid var(--red-edge)}
 .demo-tag{background:var(--spoiler);color:var(--bar);border:0;font-weight:700;letter-spacing:.01em}
 .office{background:var(--box);border:1.5px solid var(--fg);box-shadow:var(--shadow-input)}
-.rail button,.rail .grp,.rail .soon{color:var(--fg)}
-.rail button:hover{background:rgba(73,36,26,.12)}
-.rail button[aria-current="page"]{background:var(--fg);color:var(--bar)}
+.rail a,.rail .grp,.rail .soon{color:var(--fg)}
+.rail a:hover{background:rgba(73,36,26,.12)}
+.rail a[aria-current="page"]{background:var(--fg);color:var(--bar)}
 .rail .sep{background:var(--fg);opacity:.4}
 main{background:var(--surface);box-shadow:var(--shadow-paper);padding:26px 28px 32px}
 .head .eyebrow{font-family:var(--hand);font-size:1.9rem;line-height:1;text-transform:none;letter-spacing:0;color:var(--sug);font-weight:400}
@@ -255,7 +277,7 @@ details.item{border-bottom:1px dashed var(--line)}
 .timeline{border-left:1.5px dashed var(--fg)} .timeline li::before{border-radius:0;border-color:var(--red);background:var(--box)}
 .link{border-left-color:var(--fg)} a{color:var(--fg)}
 :focus-visible{outline:2px solid var(--red);outline-offset:3px}
-@media (max-width:860px){ main{padding:18px 14px 24px} .rail button{background:var(--bar)} .rail button[aria-current="page"]{background:var(--fg)} }
+@media (max-width:53.75em){ main{padding:18px 14px 24px} .rail a{background:var(--bar)} .rail a[aria-current="page"]{background:var(--fg)} }
 </style>
 </head>
 <body>
@@ -387,7 +409,7 @@ fila(){const rows=CASES;const q=S.fila==='quadro';
  const top=head('Processos','O que precisa de atenção hoje','Cada processo aparece na etapa em que está, com a próxima ação e quem deve agir. As etapas vêm do módulo de visto; outro tipo de visto traz as suas.')+`
  <div class="row between"><div class="seg" role="group" aria-label="Modo de exibição"><button data-fila="quadro" aria-pressed="${q}">Quadro</button><button data-fila="lista" aria-pressed="${!q}">Lista</button></div>
   <span class="muted" style="font-size:.84rem">${rows.length} processos · clique no JP-2026-0412 para abrir</span></div>`;
- if(q)return top+`<div class="scroll"><div class="board">${COLS.map(c=>{const it=rows.filter(r=>r[2]===c[0]);return `<section class="col"><header><b>${c[0]}</b><span>${it.length}</span></header>${c[1]?`<span class="gate">🔒 ${c[1]}</span>`:''}${it.map(card).join('')||'<span class="empty">Nenhum processo</span>'}</section>`}).join('')}</div></div>
+ if(q)return top+`<div class="scroll fade-x"><div class="board">${COLS.map(c=>{const it=rows.filter(r=>r[2]===c[0]);return `<section class="col"><header><b>${c[0]}</b><span>${it.length}</span></header>${c[1]?`<span class="gate">🔒 ${c[1]}</span>`:''}${it.map(card).join('')||'<span class="empty">Nenhum processo</span>'}</section>`}).join('')}</div></div>
  <p class="note">Mudar um processo de etapa sempre pede motivo e responsável, e fica no histórico. As colunas com cadeado só aceitam o processo quando a condição foi cumprida. Há ainda 1 processo encaminhado, fora da área de cobertura.</p>`;
  return top+`
  <div class="panel"><div class="scroll"><table><thead><tr><th>Caso</th><th>Etapa</th><th>Próxima ação</th><th>Responsável</th><th>Prazo</th></tr></thead><tbody>
@@ -479,7 +501,7 @@ Qualquer dúvida, é só chamar.`;
    <p class="muted" style="font-size:.8rem">Gerado em 11/11/2026 · base de regras de 26/10/2026 · não é parecer de elegibilidade.</p></div></div>
   <div class="panel"><div class="row between" style="margin-bottom:12px"><h2>Mensagem ao cliente</h2>${pill('sug','Rascunho')}</div>
    <pre class="msg" id="msg">${msg}</pre>
-   <div class="row" style="margin-top:12px"><button class="btn pri" id="copy">Copiar mensagem</button><span class="muted" id="copied" style="font-size:.84rem">O sistema não envia nada sozinho.</span></div></div>
+   <div class="row" style="margin-top:12px"><span class="copy"><button type="button" class="btn pri" id="copy" command="--copy" commandfor="msg">Copiar mensagem</button><span class="tip" role="status"></span></span><span class="muted" style="font-size:.84rem">O sistema não envia nada sozinho.</span></div></div>
  </div>`},
 
 revisao(){const c=counts();const lin=!S.sim;const bl=S.sim?[]:[
@@ -534,23 +556,36 @@ alertas(){return head('Alertas de mudança','Aviso quando uma regra muda','Em co
   <div class="row" style="margin-top:14px"><button class="btn pri" disabled>Aprovar</button><button class="btn" disabled>Editar</button><button class="btn" disabled>Descartar</button></div></div>`}
 };
 
-function rail(){let n=0;$('#rail').innerHTML=VIEWS.map(v=>v.grp?`<div class="grp ${v.off?'off':''}"><i></i>${v.grp}</div>${v.soon?`<div class="soon">${v.soon}</div>`:''}`:`<button data-go="${v.id}" ${v.id===S.view?'aria-current="page"':''}><span class="n">${v.id==='visao'||v.id==='regras'||v.id==='alertas'?'·':++n}</span>${v.t}${v.tag?`<small>${v.tag}</small>`:''}</button>`).join('')}
+function rail(){let n=0;$('#rail').innerHTML=VIEWS.map(v=>v.grp?`<div class="grp ${v.off?'off':''}"><i></i>${v.grp}</div>${v.soon?`<div class="soon">${v.soon}</div>`:''}`:`<a href="#${v.id}" data-go="${v.id}" ${v.id===S.view?'aria-current="page"':''}><span class="n">${v.id==='visao'||v.id==='regras'||v.id==='alertas'?'·':++n}</span>${v.t}${v.tag?`<small>${v.tag}</small>`:''}</a>`).join('')}
 function render(keep){rail();$('#main').innerHTML=R[S.view]();if(!keep)window.scrollTo(0,0)}
-function nav(id){if(!R[id])return;S.view=id;try{history.replaceState(null,'','#'+id)}catch(e){location.hash=id}render()}
+function nav(id){if(!R[id])return;
+ const upd=()=>{S.view=id;try{history.replaceState(null,'','#'+id)}catch(e){}render()};
+ // leva o foco ao título da nova tela, para teclado e leitor de tela acompanharem a troca
+ const foc=()=>{const h=$('#main h1');if(h){h.tabIndex=-1;h.focus({preventScroll:true})}};
+ if(!document.startViewTransition){upd();foc();return}
+ const t=document.startViewTransition(upd);(t.updateCallbackDone||t.finished).then(foc,foc)}
+let lastMsg='';const timers=new WeakMap();
+function report(button,ok){const tip=button.nextElementSibling;clearTimeout(timers.get(button));
+ button.removeAttribute('data-copied');button.removeAttribute('data-failed');
+ let m=ok?'Mensagem copiada':'Não foi possível copiar';if(m===lastMsg)m+=' ';lastMsg=m;
+ tip.textContent='';button.setAttribute(ok?'data-copied':'data-failed','');
+ requestAnimationFrame(()=>{tip.textContent=m});
+ timers.set(button,setTimeout(()=>{button.removeAttribute('data-copied');button.removeAttribute('data-failed');tip.textContent=''},2500))}
+async function copy(button,target){const text=target.innerText.trim();if(!text)return;
+ try{await navigator.clipboard.writeText(text);report(button,true)}catch(e){report(button,false)}}
+if('CommandEvent' in window){document.addEventListener('command',e=>{if(e.command==='--copy')copy(e.source,e.target)},true)}
+else{document.addEventListener('click',e=>{const b=e.target.closest('button[command="--copy"]');if(!b)return;const t=document.getElementById(b.getAttribute('commandfor'));if(t)copy(b,t)})}
 document.addEventListener('click',e=>{
- const g=e.target.closest('[data-go]');if(g){nav(g.dataset.go);return}
+ const g=e.target.closest('[data-go]');if(g){e.preventDefault();nav(g.dataset.go);return}
  const fl=e.target.closest('[data-fila]');if(fl){S.fila=fl.dataset.fila;render(1);return}
  const d=e.target.closest('[data-doc]');if(d){S.doc=d.dataset.doc;render(1);return}
  const k=e.target.closest('[data-ok]');if(k){S.ok[k.dataset.ok]=1;render(1);return}
  const a=e.target.closest('[data-all]');if(a){const doc=DOCS.find(x=>x.id===a.dataset.all);doc.f.forEach((f,i)=>{if(f[2]!=='div')S.ok[doc.id+i]=1});render(1);return}
  if(e.target.id==='sim'){S.sim=!S.sim;render(1);return}
- if(e.target.id==='copy'){const t=$('#msg').textContent;const done=()=>{$('#copied').textContent='Mensagem copiada.'};
-   try{navigator.clipboard.writeText(t).then(done,()=>sel())}catch(x){sel()}
-   function sel(){const r=document.createRange();r.selectNodeContents($('#msg'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('#copied').textContent='Texto selecionado: copie com Ctrl+C.'}}
 });
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('tr[data-go]'))nav(e.target.dataset.go)});
-function fromHash(){const h=location.hash.replace('#','');if(R[h])S.view=h;render()}
-window.addEventListener('hashchange',fromHash);fromHash();
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(R[h]&&h!==S.view)nav(h)});
+{const h=location.hash.slice(1);if(R[h])S.view=h;render()}
 </script>
 
 </body>
