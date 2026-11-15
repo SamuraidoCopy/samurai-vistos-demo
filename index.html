@@ -572,7 +572,11 @@ function report(button,ok){const tip=button.nextElementSibling;clearTimeout(time
  requestAnimationFrame(()=>{tip.textContent=m});
  timers.set(button,setTimeout(()=>{button.removeAttribute('data-copied');button.removeAttribute('data-failed');tip.textContent=''},2500))}
 async function copy(button,target){const text=target.innerText.trim();if(!text)return;
- try{await navigator.clipboard.writeText(text);report(button,true)}catch(e){report(button,false)}}
+ try{await navigator.clipboard.writeText(text);report(button,true)}catch(e){report(button,legacyCopy(text))}}
+// último recurso para navegadores ou painéis que recusam a área de transferência moderna
+function legacyCopy(text){const f=Object.assign(document.createElement('textarea'),{value:text});f.setAttribute('readonly','');
+ f.style.cssText='position:fixed;inset-block-start:0;opacity:0';document.body.append(f);f.select();
+ try{return document.execCommand('copy')}catch(e){return false}finally{f.remove()}}
 if('CommandEvent' in window){document.addEventListener('command',e=>{if(e.command==='--copy')copy(e.source,e.target)},true)}
 else{document.addEventListener('click',e=>{const b=e.target.closest('button[command="--copy"]');if(!b)return;const t=document.getElementById(b.getAttribute('commandfor'));if(t)copy(b,t)})}
 document.addEventListener('click',e=>{
